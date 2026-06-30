@@ -469,7 +469,7 @@
     
     // Force supersampling (minimum 2x) to create a gorgeous dense mesh effect instead of thin scattered dots
     let dpr = Math.max(window.devicePixelRatio || 1, 2);
-    const mouse = { x: null, y: null, radius: 50 * dpr, radiusSq: (50 * dpr) * (50 * dpr) };
+    const mouse = { x: null, y: null, radius: 60 * dpr, radiusSq: (60 * dpr) * (60 * dpr) };
 
     window.addEventListener('mousemove',  e => { 
         mouse.x = e.clientX * dpr; 
@@ -616,9 +616,9 @@
                         if (distSq < mouse.radiusSq) {
                             const d = Math.sqrt(distSq);
                             const f = (mouse.radius - d) / mouse.radius;
-                            // Much weaker repel force for a subtle distortion effect instead of a hard empty circle
-                            p.x -= (dx/d) * f * p.density * 0.2;
-                            p.y -= (dy/d) * f * p.density * 0.2;
+                            // Balanced repel force: strong enough to be satisfying, weak enough to not create a void
+                            p.x -= (dx/d) * f * p.density * 0.6;
+                            p.y -= (dy/d) * f * p.density * 0.6;
                             moving = true;
                         }
                     }
