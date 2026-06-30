@@ -391,12 +391,21 @@
     const loadEl = document.getElementById('loading');
 
     let particles = [];
+    let animationId = null;
     const mouse = { x: null, y: null, radius: 180, radiusSq: 180 * 180 };
 
-    window.addEventListener('mousemove',  e => { mouse.x = e.clientX; mouse.y = e.clientY; });
-    window.addEventListener('mouseout',   () => { mouse.x = null;     mouse.y = null; });
-    window.addEventListener('touchmove',  e => { mouse.x = e.touches[0].clientX; mouse.y = e.touches[0].clientY; }, { passive: true });
-    window.addEventListener('touchend',   () => { mouse.x = null;     mouse.y = null; });
+    window.addEventListener('mousemove',  e => { 
+        mouse.x = e.clientX; 
+        mouse.y = e.clientY; 
+        if (!animationId && particles.length > 0) animationId = requestAnimationFrame(draw);
+    });
+    window.addEventListener('mouseout',   () => { mouse.x = null; mouse.y = null; });
+    window.addEventListener('touchmove',  e => { 
+        mouse.x = e.touches[0].clientX; 
+        mouse.y = e.touches[0].clientY; 
+        if (!animationId && particles.length > 0) animationId = requestAnimationFrame(draw);
+    }, { passive: true });
+    window.addEventListener('touchend',   () => { mouse.x = null; mouse.y = null; });
 
     class Particle {
         constructor(x, y, ch, color, cw, ch_screen) {
@@ -412,22 +421,6 @@
             
             // Random easing for organic, non-uniform assembly
             this.easing = Math.random() * 0.04 + 0.02; // between 0.02 and 0.06
-        }
-        update() {
-            if (mouse.x !== null) {
-                const dx = mouse.x - this.x, dy = mouse.y - this.y;
-                const distSq = dx*dx + dy*dy;
-                // Performance: only run Math.sqrt if within radius bounding box
-                if (distSq < mouse.radiusSq) {
-                    const d = Math.sqrt(distSq);
-                    const f = (mouse.radius - d) / mouse.radius;
-                    this.x -= (dx/d) * f * this.density * 1.5;
-                    this.y -= (dy/d) * f * this.density * 1.5;
-                }
-            }
-            // Use organic easing
-            this.x += (this.baseX - this.x) * this.easing;
-            this.y += (this.baseY - this.y) * this.easing;
         }
     }
 
@@ -487,7 +480,7 @@
             particles.sort((a, b) => a.color.localeCompare(b.color));
 
             loadEl.style.display = 'none';
-            requestAnimationFrame(draw);
+            if (!animationId) animationId = requestAnimationFrame(draw);
 
             // COLOR REVEAL ANIMATION: Wait 1.5s then smoothly transition canvas from grayscale to full color
             setTimeout(() => {
@@ -515,12 +508,57 @@
         ctx.textBaseline = 'middle';
 
         let last = '';
-        for (const p of particles) {
-            p.update();
-            if (p.color !== last) { ctx.fillStyle = p.color; last = p.color; }
-            ctx.fillText(p.ch, p.x, p.y);
+        let stillMoving = false;
+
+        for (let i = 0; i < particles.length; i++) {
+            const p = particles[i];
+            let moving = false;
+
+            // Inlined update physics for maximum execution speed
+            if (mouse.x !== null) {
+                const dx = mouse.x - p.x, dy = mouse.y - p.y;
+                const distSq = dx*dx + dy*dy;
+                if (distSq < mouse.radiusSq) {
+                    const d = Math.sqrt(distSq);
+                    const f = (mouse.radius - d) / mouse.radius;
+                    p.x -= (dx/d) * f * p.density * 1.5;
+                    p.y -= (dy/d) * f * p.density * 1.5;
+                    moving = true;
+                }
+            }
+            
+            const diffX = p.baseX - p.x;
+            const diffY = p.baseY - p.y;
+            
+            if (Math.abs(diffX) > 0.05 || Math.abs(diffY) > 0.05) {
+                p.x += diffX * p.easing;
+                p.y += diffY * p.easing;
+                moving = true;
+            } else if (mouse.x === null) {
+                // Snap exactly to target coordinate when resting
+                p.x = p.baseX;
+                p.y = p.baseY;
+            }
+
+            if (moving) stillMoving = true;
+
+            if (p.color !== last) { 
+                ctx.fillStyle = p.color; 
+                last = p.color; 
+            }
+            
+            // Fast integer casting (~~) avoids subpixel text blur and vastly improves render speed
+            ctx.fillText(p.ch, ~~p.x, ~~p.y);
         }
-        requestAnimationFrame(draw);
+
+        if (mouse.x !== null) stillMoving = true;
+
+        if (stillMoving) {
+            animationId = requestAnimationFrame(draw);
+        } else {
+            // Sleep mode: CPU drops to 0% when animation finishes and mouse is inactive!
+            animationId = null;
+        }
     }
 
     let rsz;
