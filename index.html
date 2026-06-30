@@ -26,9 +26,6 @@
             height: 100vh;
             z-index: 0;
             display: block;
-            /* Start grayscale for the color reveal animation */
-            filter: grayscale(100%);
-            transition: filter 3s ease;
         }
 
         /* ─── INITIAL HIDDEN STATE & ANIMATIONS ─── */
@@ -537,8 +534,8 @@
                     const iy   = Math.min(Math.floor(posY), canvas.height - 1);
                     const i4   = (iy * canvas.width + ix) * 4;
                     
-                    // PERFORMANCE BOOST: Skip extremely dark pixels that are invisible on a black background
-                    if (px[i4] < 8 && px[i4+1] < 8 && px[i4+2] < 8) continue;
+                    // PERFORMANCE BOOST: Aggressive culling of dark shadow pixels to drastically reduce rendering load
+                    if (px[i4] < 28 && px[i4+1] < 28 && px[i4+2] < 28) continue;
 
                     particles.push(new Particle(posX, posY, char,
                         `rgb(${px[i4]},${px[i4+1]},${px[i4+2]})`, canvas.width, canvas.height));
@@ -549,11 +546,6 @@
             particles.sort((a, b) => a.color.localeCompare(b.color));
 
             if (!animationId) animationId = requestAnimationFrame(draw);
-
-            // COLOR REVEAL ANIMATION: Wait 1.5s then smoothly transition canvas from grayscale to full color
-            setTimeout(() => {
-                canvas.style.filter = 'grayscale(0%)';
-            }, 1500);
 
             // Trigger UI reveal after particles assemble
             setTimeout(() => {
