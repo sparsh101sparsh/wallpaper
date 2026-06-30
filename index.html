@@ -469,7 +469,13 @@
     
     // Force supersampling (minimum 2x) to create a gorgeous dense mesh effect instead of thin scattered dots
     let dpr = Math.max(window.devicePixelRatio || 1, 2);
-    const mouse = { x: null, y: null, radius: 60 * dpr, radiusSq: (60 * dpr) * (60 * dpr) };
+    const mouse = { 
+        x: null, 
+        y: null, 
+        radius: 70 * dpr, 
+        radiusSq: (70 * dpr) * (70 * dpr),
+        square: 45 * dpr
+    };
 
     window.addEventListener('mousemove',  e => { 
         mouse.x = e.clientX * dpr; 
@@ -491,14 +497,13 @@
             this.ch = ch;
             this.color = color;
             this.density = Math.random() * 20 + 5;
-            this.magic = Math.random(); // Used for organic mouse interaction
 
             // Start scattered randomly across the screen for the entrance animation
             this.x = (Math.random() - 0.5) * cw * 1.5 + cw / 2;
             this.y = (Math.random() - 0.5) * ch_screen * 1.5 + ch_screen / 2;
             
-            // Random easing for slow-motion organic assembly
-            this.easing = Math.random() * 0.008 + 0.004; // between 0.004 and 0.012 (very slow motion)
+            // Random easing for organic, non-uniform assembly
+            this.easing = Math.random() * 0.015 + 0.01; // between 0.01 and 0.025 (slower)
         }
     }
 
@@ -575,7 +580,7 @@
             // Trigger UI reveal after particles assemble
             setTimeout(() => {
                 document.body.classList.add('show-ui');
-            }, 5500); // Wait 5.5s for the majestic slow-motion particle assembly
+            }, 3800); // Wait 3.8s for the majestic particle assembly
 
         } catch(e) {
             console.error(e);
@@ -608,34 +613,32 @@
 
             // Inlined update physics for maximum execution speed
             if (mouse.x !== null) {
-                const dx = mouse.x - p.x;
+                let dx = mouse.x - p.x;
                 // AABB (Bounding Box) Fast Check: Only do math if particle is roughly near the mouse
                 if (dx > -mouse.radius && dx < mouse.radius) {
-                    const dy = mouse.y - p.y;
+                    let dy = mouse.y - p.y;
                     if (dy > -mouse.radius && dy < mouse.radius) {
                         const distSq = dx*dx + dy*dy;
                         if (distSq < mouse.radiusSq) {
                             const d = Math.sqrt(distSq);
                             const f = (mouse.radius - d) / mouse.radius;
-                            
-                            // Organic interaction to break the "perfect circle" effect
-                            if (p.magic < 0.25) {
-                                // 25% of particles fall downwards like digital rain
-                                p.y += (f * p.density * 1.2);
-                                p.x += (Math.sin(p.y * 0.1) * f * 2);
-                            } else if (p.magic < 0.45) {
-                                // 20% just jiggle in place (staying inside the border)
-                                p.x += (Math.random() - 0.5) * f * 10;
-                                p.y += (Math.random() - 0.5) * f * 10;
-                            } else {
-                                // The rest get pushed away, but with irregular strength based on 'magic'
-                                const pushStrength = p.magic * 1.5;
-                                p.x -= (dx/d) * f * p.density * pushStrength;
-                                p.y -= (dy/d) * f * p.density * pushStrength;
-                            }
+                            p.x -= (dx/d) * f * p.density * 1.5;
+                            p.y -= (dy/d) * f * p.density * 1.5;
                             moving = true;
                         }
                     }
+                }
+                
+                // Hard Square Limit: rigidly push out any particle that enters the inner square
+                dx = mouse.x - p.x;
+                let dy = mouse.y - p.y;
+                if (Math.abs(dx) < mouse.square && Math.abs(dy) < mouse.square) {
+                    if (Math.abs(dx) > Math.abs(dy)) {
+                        p.x = mouse.x - (dx > 0 ? mouse.square : -mouse.square);
+                    } else {
+                        p.y = mouse.y - (dy > 0 ? mouse.square : -mouse.square);
+                    }
+                    moving = true;
                 }
             }
             
