@@ -575,14 +575,20 @@
 
             // Inlined update physics for maximum execution speed
             if (mouse.x !== null) {
-                const dx = mouse.x - p.x, dy = mouse.y - p.y;
-                const distSq = dx*dx + dy*dy;
-                if (distSq < mouse.radiusSq) {
-                    const d = Math.sqrt(distSq);
-                    const f = (mouse.radius - d) / mouse.radius;
-                    p.x -= (dx/d) * f * p.density * 1.5;
-                    p.y -= (dy/d) * f * p.density * 1.5;
-                    moving = true;
+                const dx = mouse.x - p.x;
+                // AABB (Bounding Box) Fast Check: Only do math if particle is roughly near the mouse
+                if (dx > -mouse.radius && dx < mouse.radius) {
+                    const dy = mouse.y - p.y;
+                    if (dy > -mouse.radius && dy < mouse.radius) {
+                        const distSq = dx*dx + dy*dy;
+                        if (distSq < mouse.radiusSq) {
+                            const d = Math.sqrt(distSq);
+                            const f = (mouse.radius - d) / mouse.radius;
+                            p.x -= (dx/d) * f * p.density * 1.5;
+                            p.y -= (dy/d) * f * p.density * 1.5;
+                            moving = true;
+                        }
+                    }
                 }
             }
             
