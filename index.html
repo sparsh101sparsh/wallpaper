@@ -469,7 +469,7 @@
     
     // Force supersampling (minimum 2x) to create a gorgeous dense mesh effect instead of thin scattered dots
     let dpr = Math.max(window.devicePixelRatio || 1, 2);
-    const mouse = { x: null, y: null, radius: 90 * dpr, radiusSq: (90 * dpr) * (90 * dpr) };
+    const mouse = { x: null, y: null, radius: 45 * dpr, radiusSq: (45 * dpr) * (45 * dpr) };
 
     window.addEventListener('mousemove',  e => { 
         mouse.x = e.clientX * dpr; 
@@ -496,8 +496,11 @@
             this.x = (Math.random() - 0.5) * cw * 1.5 + cw / 2;
             this.y = (Math.random() - 0.5) * ch_screen * 1.5 + ch_screen / 2;
             
-            // Random easing for organic, non-uniform assembly
-            this.easing = Math.random() * 0.015 + 0.01; // between 0.01 and 0.025 (slower)
+            // Physics properties for spring-based animation
+            this.vx = 0;
+            this.vy = 0;
+            this.friction = Math.random() * 0.06 + 0.82; // 0.82 to 0.88
+            this.spring = Math.random() * 0.015 + 0.015; // 0.015 to 0.03
         }
     }
 
@@ -616,25 +619,38 @@
                         if (distSq < mouse.radiusSq) {
                             const d = Math.sqrt(distSq);
                             const f = (mouse.radius - d) / mouse.radius;
-                            p.x -= (dx/d) * f * p.density * 1.5;
-                            p.y -= (dy/d) * f * p.density * 1.5;
+                            // Push velocity away from mouse instead of snapping position
+                            p.vx -= (dx/d) * f * p.density * 0.5;
+                            p.vy -= (dy/d) * f * p.density * 0.5;
                             moving = true;
                         }
                     }
                 }
             }
             
+            // Spring physics towards base position
             const diffX = p.baseX - p.x;
             const diffY = p.baseY - p.y;
             
-            if (Math.abs(diffX) > 0.05 || Math.abs(diffY) > 0.05) {
-                p.x += diffX * p.easing;
-                p.y += diffY * p.easing;
+            p.vx += diffX * p.spring;
+            p.vy += diffY * p.spring;
+            
+            // Apply friction
+            p.vx *= p.friction;
+            p.vy *= p.friction;
+            
+            // Update position
+            p.x += p.vx;
+            p.y += p.vy;
+            
+            if (Math.abs(p.vx) > 0.05 || Math.abs(p.vy) > 0.05 || Math.abs(diffX) > 0.05 || Math.abs(diffY) > 0.05) {
                 moving = true;
             } else if (mouse.x === null) {
                 // Snap exactly to target coordinate when resting
                 p.x = p.baseX;
                 p.y = p.baseY;
+                p.vx = 0;
+                p.vy = 0;
             }
 
             if (moving) stillMoving = true;
