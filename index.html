@@ -38,6 +38,18 @@
             z-index: 300;
         }
 
+        /* ─── INITIAL HIDDEN STATE & ANIMATIONS ─── */
+        .gradient-overlay, nav, .panel {
+            opacity: 0;
+            transition: opacity 2s ease, transform 2s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        nav { transform: translateY(-20px); }
+        .panel { transform: translateY(30px); }
+
+        body.show-ui .gradient-overlay { opacity: 1; }
+        body.show-ui nav { opacity: 1; transform: translateY(0); }
+        body.show-ui .panel { opacity: 1; transform: translateY(0); }
+
         /* ─── Gradient Overlay ─── */
         /* This creates the solid black left side that fades into the ASCII art */
         .gradient-overlay {
@@ -384,12 +396,19 @@
     window.addEventListener('touchend',   () => { mouse.x = null;     mouse.y = null; });
 
     class Particle {
-        constructor(x, y, ch, color) {
-            this.baseX = this.x = x;
-            this.baseY = this.y = y;
+        constructor(x, y, ch, color, cw, ch_screen) {
+            this.baseX = x;
+            this.baseY = y;
             this.ch = ch;
             this.color = color;
             this.density = Math.random() * 20 + 5;
+
+            // Start scattered randomly across the screen for the entrance animation
+            this.x = (Math.random() - 0.5) * cw * 1.5 + cw / 2;
+            this.y = (Math.random() - 0.5) * ch_screen * 1.5 + ch_screen / 2;
+            
+            // Random easing for organic, non-uniform assembly
+            this.easing = Math.random() * 0.04 + 0.02; // between 0.02 and 0.06
         }
         update() {
             if (mouse.x !== null) {
@@ -401,8 +420,9 @@
                     this.y -= (dy/d) * f * this.density * 1.5;
                 }
             }
-            this.x += (this.baseX - this.x) / 15;
-            this.y += (this.baseY - this.y) / 15;
+            // Use organic easing
+            this.x += (this.baseX - this.x) * this.easing;
+            this.y += (this.baseY - this.y) * this.easing;
         }
     }
 
@@ -450,12 +470,17 @@
                     const iy   = Math.min(Math.floor(posY), canvas.height - 1);
                     const i4   = (iy * canvas.width + ix) * 4;
                     particles.push(new Particle(posX, posY, char,
-                        `rgb(${px[i4]},${px[i4+1]},${px[i4+2]})`));
+                        `rgb(${px[i4]},${px[i4+1]},${px[i4+2]})`, canvas.width, canvas.height));
                 }
             }
 
             loadEl.style.display = 'none';
             requestAnimationFrame(draw);
+
+            // Trigger UI reveal after particles assemble
+            setTimeout(() => {
+                document.body.classList.add('show-ui');
+            }, 2500); // Wait 2.5s for the majestic particle assembly
 
         } catch(e) {
             loadEl.textContent = 'ERROR LOADING ASSETS';
