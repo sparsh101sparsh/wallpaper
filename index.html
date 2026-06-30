@@ -492,15 +492,14 @@
             this.color = color;
             this.density = Math.random() * 20 + 5;
 
-            // Start scattered randomly across the screen for the entrance animation
-            this.x = (Math.random() - 0.5) * cw * 1.5 + cw / 2;
-            this.y = (Math.random() - 0.5) * ch_screen * 1.5 + ch_screen / 2;
+            // Assemble from the four corners of the screen
+            const corner = Math.floor(Math.random() * 4);
+            const spread = 200 * (window.devicePixelRatio || 1); 
+            this.x = (corner === 1 || corner === 2 ? cw : 0) + (Math.random() - 0.5) * spread;
+            this.y = (corner === 2 || corner === 3 ? ch_screen : 0) + (Math.random() - 0.5) * spread;
             
-            // Physics properties for spring-based animation
-            this.vx = 0;
-            this.vy = 0;
-            this.friction = Math.random() * 0.06 + 0.82; // 0.82 to 0.88
-            this.spring = Math.random() * 0.015 + 0.015; // 0.015 to 0.03
+            // Medium, natural easing
+            this.easing = Math.random() * 0.025 + 0.015;
         }
     }
 
@@ -577,7 +576,7 @@
             // Trigger UI reveal after particles assemble
             setTimeout(() => {
                 document.body.classList.add('show-ui');
-            }, 3800); // Wait 3.8s for the majestic particle assembly
+            }, 2500); // Wait 2.5s for the majestic particle assembly
 
         } catch(e) {
             console.error(e);
@@ -619,38 +618,25 @@
                         if (distSq < mouse.radiusSq) {
                             const d = Math.sqrt(distSq);
                             const f = (mouse.radius - d) / mouse.radius;
-                            // Push velocity away from mouse instead of snapping position
-                            p.vx -= (dx/d) * f * p.density * 0.5;
-                            p.vy -= (dy/d) * f * p.density * 0.5;
+                            p.x -= (dx/d) * f * p.density * 1.5;
+                            p.y -= (dy/d) * f * p.density * 1.5;
                             moving = true;
                         }
                     }
                 }
             }
             
-            // Spring physics towards base position
             const diffX = p.baseX - p.x;
             const diffY = p.baseY - p.y;
             
-            p.vx += diffX * p.spring;
-            p.vy += diffY * p.spring;
-            
-            // Apply friction
-            p.vx *= p.friction;
-            p.vy *= p.friction;
-            
-            // Update position
-            p.x += p.vx;
-            p.y += p.vy;
-            
-            if (Math.abs(p.vx) > 0.05 || Math.abs(p.vy) > 0.05 || Math.abs(diffX) > 0.05 || Math.abs(diffY) > 0.05) {
+            if (Math.abs(diffX) > 0.05 || Math.abs(diffY) > 0.05) {
+                p.x += diffX * p.easing;
+                p.y += diffY * p.easing;
                 moving = true;
             } else if (mouse.x === null) {
                 // Snap exactly to target coordinate when resting
                 p.x = p.baseX;
                 p.y = p.baseY;
-                p.vx = 0;
-                p.vy = 0;
             }
 
             if (moving) stillMoving = true;
