@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fallen Angel ASCII Art</title>
+    <style>
+        body, html {
+            background-color: #000;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: "Courier New", Courier, monospace;
+        }
+        canvas {
+            display: block;
+        }
+        #loading {
+            color: #d32f2f;
+            position: absolute;
+            font-size: 20px;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div id="loading">Loading particles...</div>
+    <canvas id="canvas"></canvas>
+    
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const loading = document.getElementById('loading');
+        
+        let particles = [];
+        let mouse = { x: null, y: null, radius: 150 };
+        
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.x;
+            mouse.y = e.y;
+        });
+        
+        // Touch support for mobile devices
+        window.addEventListener('touchmove', (e) => {
+            mouse.x = e.touches[0].clientX;
+            mouse.y = e.touches[0].clientY;
+        });
+        
+        window.addEventListener('mouseout', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
+        
+        window.addEventListener('touchend', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
+
+        class Particle {
+            constructor(x, y, char, color) {
+                this.x = x;
+                this.y = y;
+                this.baseX = x;
+                this.baseY = y;
+                this.char = char;
+                this.color = color;
+                // Randomize mass/density for cool varying scatter speeds
+                this.density = (Math.random() * 20) + 5;
+            }
+            
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.fillText(this.char, this.x, this.y);
+            }
+            
+            update() {
+                // Scatter logic
+                if (mouse.x != null) {
+                    let dx = mouse.x - this.x;
+                    let dy = mouse.y - this.y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < mouse.radius) {
+                        let forceDirectionX = dx / distance;
+                        let forceDirectionY = dy / distance;
+                        let force = (mouse.radius - distance) / mouse.radius;
+                        
+                        let directionX = forceDirectionX * force * this.density;
+                        let directionY = forceDirectionY * force * this.density;
+                        
+                        // Move away from mouse
+                        this.x -= directionX * 1.5;
+                        this.y -= directionY * 1.5;
+                    }
+                }
+                
+                // Spring back logic
+                if (this.x !== this.baseX) {
+                    let dx = this.x - this.baseX;
+                    this.x -= dx / 15; // smoothness
+                }
+                if (this.y !== this.baseY) {
+                    let dy = this.y - this.baseY;
+                    this.y -= dy / 15;
+                }
+            }
+        }
+        
+        async function init() {
+            try {
+                // Load ASCII text
+                const textResponse = await fetch('ascii-fallen-angel.txt');
+                const text = await textResponse.text();
+                // Avoid empty lines at the end
+                const lines = text.split('\n').filter(line => line.trim().length > 0 || line.length > 0);
+                
+                // Load Source Image
+                const img = new Image();
+                img.src = 'Fallen_Angel_(Alexandre_Cabanel)_crop.jpg';
+                await new Promise(r => img.onload = r);
+                
+                // Make canvas fit the window
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                
+                // Use a temporary canvas to sample colors from the image
+                const imgCanvas = document.createElement('canvas');
+                const imgCtx = imgCanvas.getContext('2d');
+                imgCanvas.width = canvas.width;
+                imgCanvas.height = canvas.height;
+                // Draw the image filling the screen
+                imgCtx.drawImage(img, 0, 0, imgCanvas.width, imgCanvas.height);
+                const imgData = imgCtx.getImageData(0, 0, imgCanvas.width, imgCanvas.height).data;
+                
+                // Calculate grid cells based on ASCII rows/cols
+                const rows = lines.length;
+                let cols = 0;
+                for (let i = 0; i < lines.length; i++) {
+                    if (lines[i].length > cols) cols = lines[i].length;
+                }
+                
+                const cellWidth = canvas.width / cols;
+                const cellHeight = canvas.height / rows;
+                // Slightly boost font size to ensure overlaps/no gaps
+                const fontSize = Math.min(cellWidth * 1.8, cellHeight * 1.2);
+                
+                ctx.font = `bold ${fontSize}px monospace`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                particles = [];
+                let lastColor = '';
+                
+                // Generate particles
+                for (let y = 0; y < rows; y++) {
+                    const line = lines[y];
+                    for (let x = 0; x < line.length; x++) {
+                        const char = line[x];
+                        // Don't waste performance rendering spaces
+                        if (char === ' ') continue;
+                        
+                        const posX = x * cellWidth + cellWidth / 2;
+                        const posY = y * cellHeight + cellHeight / 2;
+                        
+                        // Sample color from the pixel
+                        const pixelX = Math.floor(posX);
+                        const pixelY = Math.floor(posY);
+                        
+                        // Bounds checking
+                        if (pixelX >= 0 && pixelX < canvas.width && pixelY >= 0 && pixelY < canvas.height) {
+                            const index = (pixelY * canvas.width + pixelX) * 4;
+                            const r = imgData[index];
+                            const g = imgData[index+1];
+                            const b = imgData[index+2];
+                            const color = `rgb(${r},${g},${b})`;
+                            
+                            particles.push(new Particle(posX, posY, char, color));
+                        }
+                    }
+                }
+                
+                loading.style.display = 'none';
+                animate();
+            } catch (error) {
+                loading.innerText = 'Error loading assets. Please refresh.';
+                console.error(error);
+            }
+        }
+        
+        function animate() {
+            // Draw slightly transparent black to create subtle trail effect (optional, here we clear entirely)
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Optimization: Set font once
+            const rows = 77; // Roughly
+            const cols = 270;
+            const cellWidth = canvas.width / cols;
+            const cellHeight = canvas.height / rows;
+            const fontSize = Math.min(cellWidth * 1.8, cellHeight * 1.2);
+            ctx.font = `bold ${fontSize}px monospace`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            let lastFill = '';
+            for (let i = 0; i < particles.length; i++) {
+                // Batch color changes for performance
+                if (lastFill !== particles[i].color) {
+                    ctx.fillStyle = particles[i].color;
+                    lastFill = particles[i].color;
+                }
+                particles[i].update();
+                ctx.fillText(particles[i].char, particles[i].x, particles[i].y);
+            }
+            requestAnimationFrame(animate);
+        }
+        
+        // Handle resizing
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                loading.style.display = 'block';
+                // Stop current animation loop slightly before resetting (handled naturally by overwriting particles)
+                init();
+            }, 500);
+        });
+        
+        init();
+    </script>
+</body>
+</html>
