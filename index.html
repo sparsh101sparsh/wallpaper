@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sparsh | Portfolio</title>
-    <!-- Modern, elegant font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <title>SPARSH SINGH</title>
     <style>
         body, html {
             background-color: #000;
@@ -13,10 +11,9 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            font-family: 'Courier New', Courier, monospace; /* Terminal/Hacker vibe */
             color: #fff;
-            overflow-x: hidden;
-            scroll-behavior: smooth;
         }
         
         /* Canvas Background */
@@ -41,199 +38,149 @@
             z-index: 100;
         }
 
-        /* Portfolio Overlay */
-        .content-wrapper {
-            position: relative;
-            z-index: 10;
-            min-height: 100vh;
-            padding: 10vh 5vw;
+        /* Left Panel Overlay */
+        .left-panel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 45vw; /* Cover almost half the screen on desktop */
+            min-width: 400px;
+            height: 100vh;
+            padding: 8vh 5vw;
+            box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 40px;
-            /* Allow mouse interaction with canvas below where there's no glass panel */
-            pointer-events: none; 
-        }
-        
-        .glass-panel {
-            /* Re-enable interactions for links/text inside the panel */
-            pointer-events: auto; 
-            background: rgba(10, 10, 10, 0.65);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            padding: 2.5rem;
-            width: 100%;
-            max-width: 800px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.3s ease;
-            animation: fadeIn 1s ease-out forwards;
+            justify-content: center;
+            /* Gradient overlay to make text readable but blend seamlessly into the art */
+            background: linear-gradient(to right, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.85) 50%, rgba(0,0,0,0) 100%);
+            z-index: 10;
+            pointer-events: none; /* Let canvas get mouse events */
+            animation: slideIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateX(-50px);
         }
 
-        @keyframes fadeIn {
+        @keyframes slideIn {
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateX(0);
             }
         }
-        
-        /* Staggered entrance animation */
-        .glass-panel:nth-child(1) { animation-delay: 0.1s; }
-        .glass-panel:nth-child(2) { animation-delay: 0.3s; }
-        .glass-panel:nth-child(3) { animation-delay: 0.5s; }
 
-        .glass-panel:hover {
-            border-color: rgba(255, 77, 77, 0.3);
-            transform: translateY(-4px);
+        /* Enable pointer events on actual interactive content */
+        .left-panel > * {
+            pointer-events: auto;
         }
 
-        header h1 {
-            margin: 0 0 15px 0;
+        h1 {
             font-size: 3.5rem;
-            letter-spacing: -1px;
-            background: linear-gradient(135deg, #ffffff 0%, #ff4d4d 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-weight: normal;
+            letter-spacing: 4px;
+            margin: 0 0 15px 0;
+            color: #fff;
         }
 
-        .social-links {
-            display: flex;
-            gap: 20px;
-        }
-
-        .social-links a {
-            color: #999;
-            text-decoration: none;
-            font-weight: 500;
+        .tagline {
             font-size: 1.1rem;
-            transition: color 0.3s ease;
-            position: relative;
+            color: #888;
+            letter-spacing: 3px;
+            margin: 0 0 25px 0;
         }
 
-        .social-links a:hover {
-            color: #ff4d4d;
-        }
-
-        .social-links a::after {
-            content: '';
-            position: absolute;
-            width: 0;
+        .divider {
+            width: 50px;
             height: 2px;
-            bottom: -4px;
-            left: 0;
-            background-color: #ff4d4d;
-            transition: width 0.3s ease;
+            background-color: #444;
+            margin: 20px 0 30px 0;
         }
 
-        .social-links a:hover::after {
-            width: 100%;
+        .intro {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: #ccc;
+            max-width: 85%;
+            margin-bottom: 50px;
         }
 
-        section h2 {
-            font-size: 2.2rem;
-            margin-top: 0;
-            margin-bottom: 2rem;
-            color: #f0f0f0;
-            letter-spacing: -0.5px;
-        }
-
-        .project-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-        }
-
-        .project-card {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            padding: 1.8rem;
-            border-radius: 12px;
-            transition: all 0.3s ease;
+        .links-container {
             display: flex;
             flex-direction: column;
+            gap: 16px;
+            width: 100%;
+            max-width: 380px;
         }
 
-        .project-card:hover {
-            background: rgba(255, 255, 255, 0.06);
-            border-color: rgba(255, 77, 77, 0.2);
-        }
-
-        .project-card h3 {
-            margin-top: 0;
-            margin-bottom: 10px;
-            font-size: 1.4rem;
-            color: #ff4d4d;
-        }
-
-        .project-card p {
-            color: #bbb;
-            font-size: 1rem;
-            line-height: 1.6;
-            margin-bottom: 20px;
-            flex-grow: 1;
-        }
-        
-        .project-link {
-            align-self: flex-start;
-            color: #fff;
+        .link-btn {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #eee;
             text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: color 0.2s;
-        }
-        
-        .project-link:hover {
-            color: #ff4d4d;
+            transition: all 0.3s ease;
+            background: rgba(10, 10, 10, 0.6);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
         }
 
-        .contact {
+        .link-btn:hover {
+            border-color: #ff4d4d;
+            background: rgba(255, 77, 77, 0.05);
+            transform: translateX(8px);
+            box-shadow: -5px 0 15px rgba(255, 77, 77, 0.1);
+        }
+
+        .link-btn .icon {
+            width: 30px;
+            font-size: 1.2rem;
             text-align: center;
-        }
-        
-        .contact p {
-            color: #bbb;
-            font-size: 1.1rem;
-            margin-bottom: 30px;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 14px 36px;
-            background: rgba(255, 77, 77, 0.1);
-            border: 1px solid #ff4d4d;
+            border-right: 1px solid #444;
+            padding-right: 15px;
+            margin-right: 15px;
             color: #fff;
-            text-decoration: none;
-            border-radius: 40px;
-            font-weight: 600;
-            font-size: 1.1rem;
-            letter-spacing: 0.5px;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transition: color 0.3s ease;
         }
 
-        .btn:hover {
-            background: #ff4d4d;
-            box-shadow: 0 0 20px rgba(255, 77, 77, 0.6);
-            transform: translateY(-2px);
+        .link-btn:hover .icon {
+            color: #ff4d4d;
+            border-right-color: #ff4d4d;
         }
-        
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
+
+        .link-btn .text {
+            flex-grow: 1;
+            font-weight: bold;
+            letter-spacing: 1.5px;
         }
-        ::-webkit-scrollbar-track {
-            background: #000;
+
+        .link-btn .arrow {
+            font-family: sans-serif;
+            transition: transform 0.3s ease;
         }
-        ::-webkit-scrollbar-thumb {
-            background: #333;
-            border-radius: 4px;
+
+        .link-btn:hover .arrow {
+            transform: translateX(5px);
+            color: #ff4d4d;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #ff4d4d;
+
+        .footer {
+            margin-top: 60px;
+            font-size: 0.8rem;
+            color: #444;
+            letter-spacing: 1px;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .left-panel {
+                width: 100vw;
+                background: rgba(0,0,0,0.85);
+                padding: 10vh 8vw;
+                justify-content: flex-start;
+                overflow-y: auto;
+            }
+            h1 { font-size: 2.5rem; }
+            .intro { max-width: 100%; }
         }
     </style>
 </head>
@@ -241,39 +188,41 @@
     <div id="loading">Summoning particles...</div>
     <canvas id="canvas"></canvas>
     
-    <div class="content-wrapper">
-        <header class="glass-panel">
-            <h1>Sparsh</h1>
-            <div class="social-links">
-                <a href="https://twitter.com/sparsh" target="_blank">Twitter</a>
-                <a href="https://linkedin.com/in/sparsh" target="_blank">LinkedIn</a>
-                <a href="https://github.com/sparsh101sparsh" target="_blank">GitHub</a>
-            </div>
-        </header>
+    <div class="left-panel">
+        <h1>SPARSH SINGH</h1>
+        <p class="tagline">CODE. DESIGN. BUILD. REPEAT.</p>
         
-        <main style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 40px;">
-            <section class="projects glass-panel">
-                <h2>Projects</h2>
-                <div class="project-grid">
-                    <div class="project-card">
-                        <h3>Interactive ASCII Art</h3>
-                        <p>A high-performance particle system built with HTML5 Canvas that transforms static ASCII art into a reactive, physics-based masterpiece.</p>
-                        <a href="https://github.com/sparsh101sparsh/wallpaper" class="project-link">View Source ➔</a>
-                    </div>
-                    <div class="project-card">
-                        <h3>Coming Soon</h3>
-                        <p>More exciting and highly aesthetic projects are currently in development. Stay tuned for amazing web experiences.</p>
-                        <a href="#" class="project-link">Learn More ➔</a>
-                    </div>
-                </div>
-            </section>
-            
-            <section class="contact glass-panel">
-                <h2>Contact Me</h2>
-                <p>Always open to exciting opportunities, creative collaborations, and building amazing experiences. Let's connect!</p>
-                <a href="mailto:contact@sparsh.dev" class="btn">Say Hello</a>
-            </section>
-        </main>
+        <div class="divider"></div>
+        
+        <p class="intro">
+            I'm a passionate developer who loves turning ideas into reality through code and design.<br><br>
+            Always learning. Always building.
+        </p>
+        
+        <div class="links-container">
+            <a href="https://github.com/sparsh101sparsh" class="link-btn" target="_blank">
+                <span class="icon">&lt;/&gt;</span>
+                <span class="text">MY PROJECTS</span>
+                <span class="arrow">→</span>
+            </a>
+            <a href="https://twitter.com/sparsh" class="link-btn" target="_blank">
+                <span class="icon">𝕏</span>
+                <span class="text">MY X ACCOUNT</span>
+                <span class="arrow">→</span>
+            </a>
+            <a href="https://linkedin.com/in/sparsh" class="link-btn" target="_blank">
+                <span class="icon">in</span>
+                <span class="text">MY LINKEDIN</span>
+                <span class="arrow">→</span>
+            </a>
+            <a href="mailto:contact@sparsh.dev" class="link-btn">
+                <span class="icon">@</span>
+                <span class="text">CONTACT ME</span>
+                <span class="arrow">→</span>
+            </a>
+        </div>
+        
+        <p class="footer">Building the future, one commit at a time.</p>
     </div>
     
     <script>
@@ -282,10 +231,8 @@
         const loading = document.getElementById('loading');
         
         let particles = [];
-        // Increased radius for a great scatter effect behind the glass panels
         let mouse = { x: null, y: null, radius: 180 };
         
-        // Track mouse movement across the entire window
         window.addEventListener('mousemove', (e) => {
             mouse.x = e.x;
             mouse.y = e.y;
@@ -349,7 +296,6 @@
         
         async function init() {
             try {
-                // Fetch assets locally
                 const textResponse = await fetch('ascii-fallen-angel.txt');
                 const text = await textResponse.text();
                 const lines = text.split('\n').filter(line => line.trim().length > 0 || line.length > 0);
@@ -419,7 +365,6 @@
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // Re-apply context font just in case
             const rows = 77;
             const cols = 270;
             const cellWidth = canvas.width / cols;
