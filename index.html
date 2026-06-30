@@ -12,11 +12,10 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            font-family: 'Courier New', Courier, monospace; /* Terminal/Hacker vibe */
+            font-family: 'Courier New', Courier, monospace;
             color: #fff;
         }
         
-        /* Canvas Background */
         canvas {
             position: fixed;
             top: 0;
@@ -38,148 +37,218 @@
             z-index: 100;
         }
 
-        /* Left Panel Overlay */
+        /* Top Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 30px 4vw;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .navbar * {
+            pointer-events: auto;
+        }
+
+        .nav-logo {
+            font-size: 1.1rem;
+            letter-spacing: 3px;
+        }
+
+        .nav-logo .prompt {
+            color: #b87a55;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 40px;
+        }
+
+        .nav-links a {
+            color: #888;
+            text-decoration: none;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            padding-bottom: 4px;
+            border-bottom: 1px solid transparent;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: #fff;
+            border-bottom: 1px solid #b87a55;
+        }
+
+        /* Left Panel Overlays */
         .left-panel {
             position: absolute;
             top: 0;
             left: 0;
-            width: 45vw;
-            min-width: 400px;
+            width: 50vw;
+            min-width: 500px;
             height: 100vh;
-            padding: 8vh 5vw;
+            padding: 15vh 4vw;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            /* Lighter gradient overlay to let the ASCII art shine through */
-            background: linear-gradient(to right, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0) 100%);
+            background: linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0) 100%);
             z-index: 10;
             pointer-events: none;
-            animation: slideIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            opacity: 0;
-            transform: translateX(-50px);
         }
 
-        @keyframes slideIn {
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        /* Enable pointer events on actual interactive content */
         .left-panel > * {
             pointer-events: auto;
         }
 
+        .greeting {
+            color: #b87a55;
+            font-size: 0.9rem;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+        }
+
         h1 {
-            font-size: 3.5rem;
+            font-size: 4rem;
             font-weight: normal;
-            letter-spacing: 4px;
-            margin: 0 0 15px 0;
+            letter-spacing: 8px;
+            margin: 0 0 25px 0;
             color: #fff;
+            line-height: 1.2;
         }
 
         .tagline {
-            font-size: 1.1rem;
-            color: #888;
+            font-size: 1rem;
+            color: #777;
             letter-spacing: 3px;
             margin: 0 0 25px 0;
         }
 
         .divider {
-            width: 50px;
-            height: 2px;
+            width: 40px;
+            height: 1px;
             background-color: #444;
-            margin: 20px 0 30px 0;
+            margin: 0 0 25px 0;
         }
 
         .intro {
-            font-size: 1.05rem;
-            line-height: 1.7;
-            color: #ccc;
-            max-width: 85%;
-            margin-bottom: 50px;
+            font-size: 0.95rem;
+            line-height: 1.8;
+            color: #999;
+            max-width: 80%;
+            margin-bottom: 40px;
         }
 
+        /* Buttons Layout */
         .links-container {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 12px;
             width: 100%;
-            max-width: 380px;
+            max-width: 320px;
+            margin-bottom: 60px;
         }
 
         .link-btn {
             display: flex;
             align-items: center;
-            padding: 16px 20px;
-            border: 1px solid #333;
-            border-radius: 8px;
+            border: 1px solid #222;
+            border-radius: 4px;
             color: #eee;
             text-decoration: none;
             transition: all 0.3s ease;
-            background: rgba(10, 10, 10, 0.6);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
+            background: rgba(10, 10, 10, 0.4);
+            overflow: hidden;
         }
 
         .link-btn:hover {
-            border-color: #ff4d4d;
-            background: rgba(255, 77, 77, 0.05);
-            transform: translateX(8px);
-            box-shadow: -5px 0 15px rgba(255, 77, 77, 0.1);
+            border-color: #555;
+            background: rgba(255, 255, 255, 0.05);
         }
 
         .link-btn .icon {
-            width: 30px;
-            font-size: 1.2rem;
-            text-align: center;
-            border-right: 1px solid #444;
-            padding-right: 15px;
-            margin-right: 15px;
-            color: #fff;
-            transition: color 0.3s ease;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-right: 1px solid #222;
+            font-size: 1.1rem;
+            color: #aaa;
+            background: rgba(20, 20, 20, 0.6);
+            transition: color 0.3s;
         }
 
         .link-btn:hover .icon {
-            color: #ff4d4d;
-            border-right-color: #ff4d4d;
+            color: #fff;
         }
 
         .link-btn .text {
             flex-grow: 1;
+            font-size: 0.85rem;
             font-weight: bold;
-            letter-spacing: 1.5px;
+            letter-spacing: 2px;
+            padding-left: 20px;
         }
 
         .link-btn .arrow {
-            font-family: sans-serif;
+            padding-right: 20px;
+            color: #666;
             transition: transform 0.3s ease;
         }
 
         .link-btn:hover .arrow {
-            transform: translateX(5px);
-            color: #ff4d4d;
+            transform: translateX(3px);
+            color: #fff;
         }
 
-        .footer {
-            margin-top: 60px;
+        /* Social Footer */
+        .social-footer {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .social-footer .connect-text {
             font-size: 0.8rem;
-            color: #444;
-            letter-spacing: 1px;
+            color: #555;
+            letter-spacing: 2px;
+            margin-right: 15px;
         }
 
-        /* Mobile responsiveness */
-        @media (max-width: 768px) {
+        .social-footer a {
+            color: #888;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .social-footer a:hover {
+            color: #fff;
+        }
+
+        @media (max-width: 900px) {
+            .navbar {
+                flex-direction: column;
+                gap: 20px;
+            }
             .left-panel {
                 width: 100vw;
+                padding: 15vh 6vw;
                 background: rgba(0,0,0,0.85);
-                padding: 10vh 8vw;
-                justify-content: flex-start;
+                min-width: unset;
                 overflow-y: auto;
             }
-            h1 { font-size: 2.5rem; }
+            h1 { font-size: 2.8rem; }
             .intro { max-width: 100%; }
         }
     </style>
@@ -188,8 +257,22 @@
     <div id="loading">Summoning particles...</div>
     <canvas id="canvas"></canvas>
     
+    <nav class="navbar">
+        <div class="nav-logo">
+            <span class="prompt">&gt;_</span> SPARSH SINGH
+        </div>
+        <div class="nav-links">
+            <a href="#" class="active">HOME</a>
+            <a href="#">ABOUT</a>
+            <a href="#">PROJECTS</a>
+            <a href="#">SKILLS</a>
+            <a href="#">CONTACT</a>
+        </div>
+    </nav>
+    
     <div class="left-panel">
-        <h1>SPARSH SINGH</h1>
+        <p class="greeting">HELLO, I'M</p>
+        <h1>SPARSH<br>SINGH</h1>
         <p class="tagline">CODE. DESIGN. BUILD. REPEAT.</p>
         
         <div class="divider"></div>
@@ -207,22 +290,36 @@
             </a>
             <a href="https://x.com/issparsh1" class="link-btn" target="_blank">
                 <span class="icon">𝕏</span>
-                <span class="text">MY X ACCOUNT</span>
+                <span class="text">MY ACCOUNT</span>
                 <span class="arrow">→</span>
             </a>
             <a href="https://www.linkedin.com/in/sparsh-singh-00a339271/" class="link-btn" target="_blank">
                 <span class="icon">in</span>
-                <span class="text">MY LINKEDIN</span>
+                <span class="text">LINKEDIN</span>
                 <span class="arrow">→</span>
             </a>
             <a href="mailto:sparppp86@gmail.com" class="link-btn">
-                <span class="icon">@</span>
+                <span class="icon">✉</span>
                 <span class="text">CONTACT ME</span>
                 <span class="arrow">→</span>
             </a>
         </div>
         
-        <p class="footer">Building the future, one commit at a time.</p>
+        <div class="social-footer">
+            <span class="connect-text">LET'S CONNECT</span>
+            <a href="https://github.com/sparsh101sparsh" target="_blank">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+            <a href="https://x.com/issparsh1" target="_blank">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+            <a href="https://www.linkedin.com/in/sparsh-singh-00a339271/" target="_blank">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+            <a href="mailto:sparppp86@gmail.com">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+            </a>
+        </div>
     </div>
     
     <script>
