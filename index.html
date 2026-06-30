@@ -524,8 +524,9 @@
             offCtx.drawImage(img, 0, 0, cols, rows);
             const px = offCtx.getImageData(0, 0, cols, rows).data;
 
-            // ASPECT RATIO FIX: Calculate font size to "cover" the screen without squashing characters
-            const fontSize = Math.max(canvas.width / (cols * 0.6), canvas.height / rows);
+            // ASPECT RATIO FIX: Calculate font size to "contain" the screen while maintaining text proportions
+            // A minimum of 5px ensures it doesn't become microscopic on mobile devices
+            const fontSize = Math.max(5, Math.min(canvas.width / (cols * 0.6), canvas.height / rows));
             const cw = fontSize * 0.6;
             const ch = fontSize * 1.0;
             
@@ -573,7 +574,7 @@
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         const rows = 77, cols = 270;
-        const fs = Math.max(canvas.width / (cols * 0.6), canvas.height / rows);
+        const fs = Math.max(5, Math.min(canvas.width / (cols * 0.6), canvas.height / rows));
         ctx.font = `bold ${fs}px 'JetBrains Mono', monospace`;
         ctx.textAlign    = 'center';
         ctx.textBaseline = 'middle';
